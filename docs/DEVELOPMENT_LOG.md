@@ -78,3 +78,6 @@ BusinessException自动转换为统一Result。
 - MySQL数据库设计
 - MyBatis-Plus集成
 - 用户模块开发
+
+Day1 实际耗时：2天
+原因：首次搭建SpringBoot项目，对Java/Spring基础概念进行补充学习

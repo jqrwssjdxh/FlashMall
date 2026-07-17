@@ -1,0 +1,8 @@
+### 注册用户
+POST http://localhost:8080/user/register
+Content-Type: application/json
+
+{
+  "username": "tom",
+  "password": "123456"
+}
