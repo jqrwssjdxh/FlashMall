@@ -1,9 +1,11 @@
 package com.flashmall.controller;
+import com.flashmall.dto.LoginDTO;
 import com.flashmall.dto.RegisterDTO;
 
 import com.flashmall.common.Result;
 import com.flashmall.entity.User;
 import com.flashmall.service.UserService;
+import com.flashmall.vo.LoginVO;
 import com.flashmall.vo.UserVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +47,16 @@ public class UserController {
         vo.setPhone(user.getPhone());
 
         return Result.success(vo);
+    }
+    @PostMapping("/login")
+    public Result<LoginVO> login(
+            @RequestBody LoginDTO loginDTO
+    ){
+
+        return Result.success(
+                userService.login(loginDTO)
+        );
+
     }
 }
 

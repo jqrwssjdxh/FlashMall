@@ -1,8 +1,23 @@
-### 注册用户
+### 1. 注册用户
 POST http://localhost:8080/user/register
 Content-Type: application/json
 
 {
-  "username": "tom",
+  "username": "test",
   "password": "123456"
 }
+
+
+### 2. 登录（获取Token）
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "123456"
+}
+
+
+### 3. 携带Token查询用户（需认证）
+GET http://localhost:8080/user/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDc5NDAzNzAzMjE0MzQyMTQ2IiwidXNlcm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNzg0NzY1OTYxLCJleHAiOjE3ODQ3NzMxNjF9.lRhd_u7hlOCA0a0ql8IwTj3hOvddsD7nKHU6FQJxBdM
