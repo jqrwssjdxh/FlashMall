@@ -21,7 +21,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     private static final List<String> WHITE_LIST =
-            Arrays.asList("/user/login", "/user/register");
+            Arrays.asList("/user/login", "/user/register", "/redis/");
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -29,7 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return WHITE_LIST.contains(request.getRequestURI());
+        String uri = request.getRequestURI();
+        return WHITE_LIST.stream().anyMatch(uri::startsWith);
     }
 
     @Override
