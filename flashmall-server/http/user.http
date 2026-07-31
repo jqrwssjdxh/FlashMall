@@ -20,4 +20,4 @@ Content-Type: application/json
 
 ### 3. 携带Token查询用户（需认证）
 GET http://localhost:8080/user/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDc5NDAzNzAzMjE0MzQyMTQ2IiwidXNlcm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNzg0NzY1OTYxLCJleHAiOjE3ODQ3NzMxNjF9.lRhd_u7hlOCA0a0ql8IwTj3hOvddsD7nKHU6FQJxBdM
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDc5NDAzNzAzMjE0MzQyMTQ2IiwidXNlcm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNzg1MjAwODA3LCJleHAiOjE3ODUyMDgwMDd9.6Y-sN6l8zCJ9jJ1skZAHGwMVzMJvneXn3C_9odZ-_-M

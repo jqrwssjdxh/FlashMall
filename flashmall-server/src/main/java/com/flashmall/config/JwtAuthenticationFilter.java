@@ -57,16 +57,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long userId = Long.valueOf(claims.getSubject());
             String username = claims.get("username", String.class);
 
-            // 写入 SecurityContext，Spring Security 才能识别为已认证
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 写入 ThreadLocal，方便业务层获取
             UserContext.setUserId(userId);
 
             chain.doFilter(request, response);
         } catch (Exception e) {
+            // ========== 只加了这两行日志，其他什么都没改 ==========
+            e.printStackTrace();
+            System.out.println("Token解析失败，原因: " + e.getMessage());
+            // ====================================================
+
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":401,\"msg\":\"Token无效或已过期\"}");

@@ -23,4 +23,10 @@ public class RedisTestController {
         redisTemplate.opsForValue().set(key, value);
         return "OK";
     }
+
+    @GetMapping("/del/{key}")
+    public String del(@PathVariable String key) {
+        redisTemplate.delete(key);
+        return "OK";
+    }
 }

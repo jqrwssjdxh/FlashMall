@@ -1,6 +1,1 @@
-### 存值
-GET http://localhost:8080/redis/set/name/hello
-
-
-### 取值
-GET http://localhost:8080/redis/get/name
+GET http://localhost:8080/product/1

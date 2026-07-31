@@ -1,78 +1,90 @@
 package com.flashmall.service.impl;
 
+import com.flashmall.constant.RedisKeyConstant;
 import com.flashmall.entity.Product;
+import com.flashmall.mapper.ProductMapper;
 import com.flashmall.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    /** 空值缓存标记（避免缓存穿透） */
-    private static final Product NULL_PRODUCT = new Product();
-
-    /** 正常缓存 TTL */
-    private static final Duration CACHE_TTL = Duration.ofMinutes(30);
-
-    /** 空值缓存 TTL（比正常短，防止占用空间） */
-    private static final Duration NULL_TTL = Duration.ofMinutes(1);
-
+    private final ProductMapper productMapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public ProductServiceImpl(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    // ==================== 缓存相关常量 ====================
+    private static final long CACHE_TTL_MINUTES = 30;
+
+    // ==================== 主流程 ====================
 
     @Override
     public Product getProduct(Long id) {
-        String key = "product:" + id;
+        String key = RedisKeyConstant.PRODUCT_CACHE_KEY + id;
 
-        // ========== 1. 查 Redis ==========
-        Product product = (Product) redisTemplate.opsForValue().get(key);
-
+        // 1. 查缓存
+        Product product = getProductFromCache(key);
         if (product != null) {
-            if (product == NULL_PRODUCT) {
-                // 命中的是空值标记 → 直接返回 null，不查 MySQL
-                log.info("命中空值缓存，productId={} → 返回 null", id);
-                return null;
-            }
-            log.info("查询Redis缓存，productId={}", id);
+            log.info("商品缓存命中，id={}", id);
             return product;
         }
 
-        // ========== 2. 查 MySQL（当前模拟） ==========
-        log.info("查询MySQL，productId={}", id);
+        // 2. 查数据库
+        log.info("商品缓存未命中，查询数据库，id={}", id);
+        product = getProductFromDatabase(id);
 
-        // TODO: 替换为真实 Mapper 查询
-        product = queryFromDatabase(id);
-
-        // ========== 3. 写 Redis ==========
+        // 3. 回填缓存（无论是否有值，都占位）
         if (product != null) {
-            redisTemplate.opsForValue().set(key, product, CACHE_TTL);
-            log.info("写入缓存，productId={}，TTL={}", id, CACHE_TTL);
+            saveToCache(key, product);
         } else {
-            // 空值也缓存，防止缓存穿透
-            redisTemplate.opsForValue().set(key, NULL_PRODUCT, NULL_TTL);
-            log.info("写入空值缓存，productId={}，TTL={}", id, NULL_TTL);
+            // 可选：空值缓存，防止穿透（如果你需要的话）
+            // saveNullToCache(key);
+            log.info("商品不存在，id={}，不写入缓存", id);
         }
 
         return product;
     }
 
-    /** 模拟数据库查询，后续替换为 Mapper */
-    private Product queryFromDatabase(Long id) {
-        // 假设 id=1 存在，其他不存在（演示空值缓存）
-        if (id == 1) {
-            Product product = new Product();
-            product.setId(id);
-            product.setName("iPhone 17");
-            product.setStock(100);
+    // ==================== 私有方法：各司其职 ====================
+
+    /**
+     * 从 Redis 缓存中获取商品
+     */
+    private Product getProductFromCache(String key) {
+        Object cache = redisTemplate.opsForValue().get(key);
+        if (cache instanceof Product product) {
             return product;
         }
         return null;
+    }
+
+    /**
+     * 从数据库获取商品
+     */
+    private Product getProductFromDatabase(Long id) {
+        return productMapper.selectById(id);
+    }
+
+    /**
+     * 写入 Redis 缓存
+     */
+    private void saveToCache(String key, Product product) {
+        redisTemplate.opsForValue().set(key, product, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+        log.info("商品写入缓存，id={}，TTL={}分钟", product.getId(), CACHE_TTL_MINUTES);
+    }
+
+    /**
+     * （可选）空值缓存，防止缓存穿透
+     */
+    private void saveNullToCache(String key) {
+        // 空值缓存，TTL 设短一点，比如 1 分钟
+        redisTemplate.opsForValue().set(key, new Product(), 1, TimeUnit.MINUTES);
+        log.info("空值写入缓存，key={}，TTL=1分钟", key);
     }
 }

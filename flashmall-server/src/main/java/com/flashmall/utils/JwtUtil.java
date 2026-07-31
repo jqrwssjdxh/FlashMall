@@ -59,7 +59,7 @@ public class JwtUtil {
  * 在加密世界里，只有用同一把钥匙（同一个 secret），才能解开用这把钥匙盖的钢印
  */
         SecretKey key = Keys.hmacShaKeyFor(
-                jwtProperties.getSecret().getBytes()
+                jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)
         );
 
 
