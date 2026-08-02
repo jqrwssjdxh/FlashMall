@@ -1,7 +1,6 @@
 package com.flashmall.config;
 
 import com.flashmall.utils.JwtUtil;
-import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

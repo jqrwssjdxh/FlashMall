@@ -1,19 +1,28 @@
 package com.flashmall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.flashmall.constant.RedisKeyConstant;
+import com.flashmall.dto.ProductCreateDTO;
+import com.flashmall.dto.ProductQueryDTO;
+import com.flashmall.dto.ProductStatusDTO;
+import com.flashmall.dto.ProductUpdateDTO;
 import com.flashmall.entity.Product;
 import com.flashmall.mapper.ProductMapper;
 import com.flashmall.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class ProductServiceImpl implements ProductService {
 
     private final ProductMapper productMapper;
@@ -49,6 +58,66 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return product;
+    }
+
+    @Override
+    public Page<Product> list(ProductQueryDTO queryDTO) {
+
+        Page<Product> page =
+                new Page<>(queryDTO.getPage(), queryDTO.getSize());
+
+        LambdaQueryWrapper<Product> wrapper =
+                new LambdaQueryWrapper<>();
+
+        wrapper.like(
+                StringUtils.hasText(queryDTO.getName()),
+                Product::getName,
+                queryDTO.getName()
+        );
+
+        wrapper.eq(
+                queryDTO.getStatus() != null,
+                Product::getStatus,
+                queryDTO.getStatus()
+        );
+
+        return productMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    public void add(ProductCreateDTO dto){
+
+        Product product = new Product();
+
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        product.setStatus(dto.getStatus());
+
+        productMapper.insert(product);
+
+    }
+
+    @Override
+    public void update(Long id, ProductUpdateDTO dto) {
+
+        Product product = new Product();
+
+        product.setId(id);
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        product.setStatus(dto.getStatus());
+
+        productMapper.updateById(product);
+
+
+        String key = RedisKeyConstant.PRODUCT_CACHE_KEY + id;
+
+
+        redisTemplate.delete(key);
     }
 
     // ==================== 私有方法：各司其职 ====================
@@ -87,4 +156,20 @@ public class ProductServiceImpl implements ProductService {
         redisTemplate.opsForValue().set(key, new Product(), 1, TimeUnit.MINUTES);
         log.info("空值写入缓存，key={}，TTL=1分钟", key);
     }
+
+    @Override
+    public void updateStatus(Long id, ProductStatusDTO dto) {
+
+        Product product = new Product();
+
+        product.setId(id);
+        product.setStatus(dto.getStatus());
+
+        productMapper.updateById(product);
+
+        String key = RedisKeyConstant.PRODUCT_CACHE_KEY + id;
+
+        redisTemplate.delete(key);
+    }
+    
 }

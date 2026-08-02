@@ -3,10 +3,13 @@ package com.flashmall.config;
 import com.flashmall.common.UserContext;
 import com.flashmall.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -15,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+@Slf4j
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -55,24 +60,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             Claims claims = jwtUtil.parseToken(token);
             Long userId = Long.valueOf(claims.getSubject());
-            String username = claims.get("username", String.class);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             UserContext.setUserId(userId);
-
-            chain.doFilter(request, response);
-        } catch (Exception e) {
-            // ========== 只加了这两行日志，其他什么都没改 ==========
-            e.printStackTrace();
-            System.out.println("Token解析失败，原因: " + e.getMessage());
-            // ====================================================
-
+        } catch (ExpiredJwtException e) {
+            log.warn("Token已过期", e);
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":401,\"msg\":\"Token无效或已过期\"}");
+            response.getWriter().write("{\"code\":401,\"msg\":\"Token已过期\"}");
+            return;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("Token解析失败", e);
+            response.setStatus(401);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":401,\"msg\":\"Token无效\"}");
+            return;
+        }
+
+        try {
+            chain.doFilter(request, response);
         } finally {
             UserContext.remove();
         }
