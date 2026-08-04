@@ -14,8 +14,9 @@ public enum ResultCode {
 
     USER_ALREADY_EXISTS(1003, "用户名已存在"),
 
-    USER_NOT_FOUND(1004, "用户不存在");
+    USER_NOT_FOUND(1004, "用户不存在"),
 
+    CART_NOT_FOUND(1005,"购物车商品不存在");
 
     private final int code;
 
@@ -43,5 +44,6 @@ public enum ResultCode {
         return msg;
 
     }
+
 
 }

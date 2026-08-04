@@ -11,27 +11,27 @@ import java.time.LocalDateTime;
 
 
 @Data
-@TableName("product")
-public class Product {
+@TableName("cart")
+public class Cart {
 
 
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
 
-    private String name;
+    private Long userId;
 
 
-    private String description;
+    private Long productId;
+
+
+    private String productName;
 
 
     private BigDecimal price;
 
 
-    private Integer stock;
-
-
-    private Integer status;
+    private Integer quantity;
 
 
     private LocalDateTime createTime;
