@@ -54,4 +54,14 @@ public class OrderController {
         );
 
     }
+    @PutMapping("/{id}/pay")
+    public Result<Void> pay(@PathVariable Long id) {
+        orderService.pay(id);
+        return Result.success();
+    }
+    @PutMapping("/{id}/cancel")
+    public Result<Void> cancel(@PathVariable Long id) {
+        orderService.cancel(id);
+        return Result.success();
+    }
 }

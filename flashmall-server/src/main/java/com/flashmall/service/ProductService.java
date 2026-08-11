@@ -21,4 +21,6 @@ public interface ProductService {
     void update(Long id, ProductUpdateDTO dto);
 
     void updateStatus(Long id, ProductStatusDTO dto);
+
+    void restoreStock(Long productId, Integer count);
 }

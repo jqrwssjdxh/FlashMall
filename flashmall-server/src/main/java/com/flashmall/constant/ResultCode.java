@@ -16,7 +16,10 @@ public enum ResultCode {
 
     USER_NOT_FOUND(1004, "用户不存在"),
 
-    CART_NOT_FOUND(1005,"购物车商品不存在");
+    CART_NOT_FOUND(1005, "购物车商品不存在"),
+    ORDER_STATUS_ERROR(1006,"订单状态错误"),
+
+    PARAM_ERROR(1007, "参数错误");
 
     private final int code;
 

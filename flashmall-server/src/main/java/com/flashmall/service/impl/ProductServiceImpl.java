@@ -1,6 +1,7 @@
 package com.flashmall.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.flashmall.constant.RedisKeyConstant;
 import com.flashmall.dto.ProductCreateDTO;
@@ -171,5 +172,18 @@ public class ProductServiceImpl implements ProductService {
 
         redisTemplate.delete(key);
     }
-    
+
+    @Override
+    public void restoreStock(Long productId, Integer count) {
+        // MySQL 恢复库存
+        productMapper.update(null,
+                new LambdaUpdateWrapper<Product>()
+                        .eq(Product::getId, productId)
+                        .setSql("stock = stock + " + count)
+        );
+
+        // 删除商品缓存，下次查询重新加载
+        redisTemplate.delete(RedisKeyConstant.PRODUCT_CACHE_KEY + productId);
+    }
+
 }

@@ -18,4 +18,10 @@ public interface OrderService {
     List<OrderVO> getMyOrders();
 
     OrderDetailVO getOrderDetail(Long orderId);
+
+    void pay(Long orderId);
+
+    void cancel(Long orderId);
+
+    void cancelTimeoutOrders();
 }
