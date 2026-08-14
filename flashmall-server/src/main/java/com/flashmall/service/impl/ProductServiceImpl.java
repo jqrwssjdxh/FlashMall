@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -174,8 +176,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void restoreStock(Long productId, Integer count) {
-        // MySQL 恢复库存
+        // MySQL 恢复库存（独立事务：即使外层事务回滚，补偿也能提交）
         productMapper.update(null,
                 new LambdaUpdateWrapper<Product>()
                         .eq(Product::getId, productId)

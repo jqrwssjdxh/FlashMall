@@ -19,7 +19,8 @@ public enum ResultCode {
     CART_NOT_FOUND(1005, "购物车商品不存在"),
     ORDER_STATUS_ERROR(1006,"订单状态错误"),
 
-    PARAM_ERROR(1007, "参数错误");
+    PARAM_ERROR(1007, "参数错误"),
+    REPEAT_SUBMIT(1008, "请勿重复提交订单");
 
     private final int code;
 

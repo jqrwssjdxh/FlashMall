@@ -3,7 +3,6 @@ package com.flashmall.controller;
 
 import com.flashmall.common.Result;
 import com.flashmall.dto.OrderCreateDTO;
-import com.flashmall.entity.Order;
 import com.flashmall.service.OrderService;
 import com.flashmall.vo.OrderDetailVO;
 import com.flashmall.vo.OrderVO;
@@ -21,19 +20,18 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public Result<Order> createOrder(
+    public Result<String> submitOrder(
             @Valid @RequestBody OrderCreateDTO dto
     ){
 
-
-        Order order =
-                orderService.createOrder(
+        String orderNo =
+                orderService.submitOrder(
                         dto.getProductId(),
                         dto.getQuantity()
                 );
 
 
-        return Result.success(order);
+        return Result.success(orderNo);
 
     }
 
